@@ -25,6 +25,7 @@ PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100
 BALL_SIZE = 20
 BALL_SPEED = 10
 
+LEVEL_INCREMENT=6
 MENU_OPTIONS = ["Continue", "Restart", "Switch Hand"]
 MENU_OPTION_HEIGHT = 50
 MENU_MARGIN = 20
@@ -164,10 +165,6 @@ def display_webcam_in_corner(screen, frame):
     y_pos = 10
     screen.blit(webcam_surf, (x_pos, y_pos))
 
-def render_speed_message(screen, message):
-    font = pygame.font.SysFont(None, 36)
-    text = font.render(message, True, WHITE)
-    screen.blit(text, (WIDTH//2 - text.get_width()//2, HEIGHT//2 - text.get_height()//2))
 
 # ================================================================
 # Global Game Variables (for pause selection)
@@ -241,8 +238,8 @@ def main():
             ball_x = WIDTH // 2
             ball_y = HEIGHT // 2
             # Reset speed to base BALL_SPEED
-            ball_vel_x = BALL_SPEED * random.choice([-1, 1])
-            ball_vel_y = BALL_SPEED * random.choice([-1, 1])
+            #ball_vel_x = BALL_SPEED * random.choice([-1, 1])
+            #ball_vel_y = BALL_SPEED * random.choice([-1, 1])
 
         def reset_game():
             global lives, score, game_state, control_hand
@@ -350,17 +347,15 @@ def main():
                 if ball_y <= 0 or (ball_y + BALL_SIZE >= HEIGHT):
                     ball_vel_y = -ball_vel_y
 
-                speed_message_time=0
                 # Paddle collision
                 if (paddle_x < ball_x < paddle_x + PADDLE_WIDTH) and (paddle_y < ball_y + BALL_SIZE < paddle_y + PADDLE_HEIGHT):
                     ball_vel_x = -ball_vel_x
                     score += 1
                     bounce_count += 1
                     # Every 6 bounces, increase ball speed by a factor of 1.25 and record message time.
-                    if bounce_count % 2 == 0:
+                    if bounce_count % LEVEL_INCREMENT == 0:
                         ball_vel_x *= 1.25
                         ball_vel_y *= 1.25
-                        speed_message_time = now
 
                 if ball_x + BALL_SIZE >= WIDTH:
                     ball_vel_x = -ball_vel_x
@@ -376,11 +371,9 @@ def main():
                 pygame.draw.rect(screen, WHITE, (paddle_x, paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT))
                 pygame.draw.rect(screen, WHITE, (ball_x, ball_y, BALL_SIZE, BALL_SIZE))
                 # Compute level as bounce_count // 6 + 1
-                level = bounce_count // 6 + 1
+                level = bounce_count // LEVEL_INCREMENT + 1
                 render_score_and_lives(screen, score, lives, level)
-                # Display the speed message for 1 second
-                if now - speed_message_time < 1:
-                    render_speed_message(screen, "Speed x1.25")
+
                 display_webcam_in_corner(screen, frame)
                 pygame.display.flip()
                 continue
